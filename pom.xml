@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2017 Red Hat, Inc. and individual contributors as indicated by the @author tags -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.agroal</groupId>
+        <artifactId>agroal-parent</artifactId>
+        <version>0.1</version>
+    </parent>
+    <groupId>io.agroal</groupId>
+    <artifactId>agroal-benchmark</artifactId>
+    <version>0.2-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Agroal Benchmark</name>
+    <description>The natural database connection pool</description>
+    <url>https://github.com/agroal</url>
+    <issueManagement>
+        <system>JIRA</system>
+        <url>https://issues.jboss.org/projects/AG</url>
+    </issueManagement>
+    <licenses>
+        <license>
+            <name>Apache License Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <scm>
+        <connection>scm:git:git://github.com/agroal/agroal.benchmark.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/agroal/agroal.benchmark.git</developerConnection>
+        <url>https://github.com/agroal/agroal</url>
+      <tag>HEAD</tag>
+  </scm>
+    <developers>
+        <developer>
+            <id>lbarreiro</id>
+            <name>Luis Barreiro</name>
+            <organization>Red Hat</organization>
+        </developer>
+    </developers>
+    <properties>
+        <!-- Dependency versions. Please keep alphabetical. Each version property should be of the form "version.<groupId>" -->
+        <!-- In cases where multiple artifacts use the same groupId but have different versions, add the artifactId or other qualifier to the property name -->
+        <version.io.agroal>0.2-SNAPSHOT</version.io.agroal>
+    </properties>
+</project>
