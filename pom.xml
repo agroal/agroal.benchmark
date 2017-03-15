@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright (C) 2017 Red Hat, Inc. and individual contributors as indicated by the @author tags -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.agroal</groupId>
         <artifactId>agroal-parent</artifactId>
         <version>0.1</version>
     </parent>
-    <groupId>io.agroal</groupId>
     <artifactId>agroal-benchmark</artifactId>
-    <version>0.2-SNAPSHOT</version>
-    <packaging>pom</packaging>
+    <version>0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
     <name>Agroal Benchmark</name>
     <description>The natural database connection pool</description>
     <url>https://github.com/agroal</url>
@@ -29,8 +29,8 @@
         <connection>scm:git:git://github.com/agroal/agroal.benchmark.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/agroal/agroal.benchmark.git</developerConnection>
         <url>https://github.com/agroal/agroal</url>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
     <developers>
         <developer>
             <id>lbarreiro</id>
@@ -42,5 +42,51 @@
         <!-- Dependency versions. Please keep alphabetical. Each version property should be of the form "version.<groupId>" -->
         <!-- In cases where multiple artifacts use the same groupId but have different versions, add the artifactId or other qualifier to the property name -->
         <version.io.agroal>0.2-SNAPSHOT</version.io.agroal>
+        <version.org.openjdk.jmh>1.18</version.org.openjdk.jmh>
     </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-core</artifactId>
+            <version>${version.org.openjdk.jmh}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-generator-annprocess</artifactId>
+            <version>${version.org.openjdk.jmh}</version>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>agroal-benchmark</finalName>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>org.openjdk.jmh.Main</mainClass>
+                                </transformer>
+                            </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/services/javax.annotation.processing.Processor</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
