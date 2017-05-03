@@ -3,9 +3,13 @@
 
 package io.agroal.benchmark;
 
+import io.agroal.api.AgroalDataSource;
+import io.agroal.api.configuration.supplier.AgroalDataSourceConfigurationSupplier;
+import io.agroal.benchmark.mock.MockDriver;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.CompilerControl;
+import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
@@ -26,11 +30,16 @@ import java.sql.SQLException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import static io.agroal.api.configuration.AgroalConnectionPoolConfiguration.PreFillMode.MAX;
+import static io.agroal.api.configuration.AgroalDataSourceConfiguration.DataSourceImplementation.AGROAL;
+import static io.agroal.api.configuration.AgroalDataSourceConfiguration.DataSourceImplementation.HIKARI;
+
 /**
  * @author <a href="lbarreiro@redhat.com">Luis Barreiro</a>
  */
-@Warmup( iterations = 3 )
-@Measurement( iterations = 8 )
+@Warmup( iterations = 4 )
+@Measurement( iterations = 10 )
+@Fork( value = 5 )
 @BenchmarkMode( Mode.Throughput )
 @OutputTimeUnit( TimeUnit.MILLISECONDS )
 @State( Scope.Benchmark )
@@ -38,13 +47,13 @@ public class ConnectionBenchmark {
 
     private static final Random RANDOM = new Random();
 
-    private static DataSource DS;
+    private static DataSource dataSource;
 
     @Param( {"agroal", "hikari"} )
     public String poolType;
 
-    @Param( {"32"} )
-    public int maxPoolSize;
+    @Param( {"50", "20", "8"} )
+    public int poolSize;
 
     @Param( {"jdbc:stub"} )
     public String jdbcUrl;
@@ -52,7 +61,7 @@ public class ConnectionBenchmark {
     @Benchmark
     @CompilerControl( CompilerControl.Mode.INLINE )
     public static Connection cycleConnection(ThreadState state) throws SQLException {
-        Connection connection = DS.getConnection();
+        Connection connection = dataSource.getConnection();
 
         // Do some work
         //doWork( false, state.random.nextInt() );
@@ -94,11 +103,34 @@ public class ConnectionBenchmark {
     // --- //
 
     @Setup( Level.Trial )
-    public void setup(BenchmarkParams params) {
+    public void setup(BenchmarkParams params) throws SQLException {
+        MockDriver.registerMockDriver();
+
+        AgroalDataSourceConfigurationSupplier supplier = new AgroalDataSourceConfigurationSupplier()
+                .metricsEnabled( false )
+                .connectionPoolConfiguration( cp -> cp
+                        .preFillMode( MAX )
+                        .maxSize( poolSize )
+                        .connectionFactoryConfiguration( cf -> cf
+                                .jdbcUrl( jdbcUrl )
+                                .driverClassName( MockDriver.class.getName() )
+                        )
+                );
+
+        switch ( poolType ) {
+            case "hikari":
+                supplier.dataSourceImplementation( HIKARI );
+            case "agroal":
+                supplier.dataSourceImplementation( AGROAL );
+        }
+        dataSource = AgroalDataSource.from( supplier );
     }
 
     @TearDown( Level.Trial )
     public void teardown() throws SQLException {
+        ( (AgroalDataSource) dataSource ).close();
+
+        MockDriver.deregisterMockDriver();
     }
 
     @State( Scope.Thread )
